@@ -1,2 +1,2 @@
 # aio-cordstore
-Use discord as a file storage using webhooks
+- Use discord as a file storage using webhooks
