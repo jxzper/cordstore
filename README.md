@@ -17,12 +17,12 @@ py -3 -m pip install -U cordstore
 # Webhook Storage
 storage = WebhookStorage("webhook_url")
 uploaded_file = await storage.upload_file("example.png")
-storage.close()
+await storage.close()
 
 # Channel Storage
 storage = ChannelStorage(bot, 1234567890123456789)
 uploaded_file = await storage.upload_file("example.png")
-storage.close()
+await storage.close()
 ```
 
 ### What would a uploaded file look like?
