@@ -9,10 +9,10 @@ from typing import (
 )
 
 __all__ = (
-    "File",
+    "UploadedFile",
 )
 
-class File:
+class UploadedFile:
     """Represents a uploaded file"""
     def __init__(self, message: Union[discord.Message, discord.WebhookMessage]) -> None:
         self.message: discord.Message = message

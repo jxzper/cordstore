@@ -4,6 +4,8 @@ from discord import Webhook
 import os
 import io
 import aiohttp
+from urllib.parse import urlparse
+from pathlib import Path
 
 from typing import (
     Union,
@@ -12,7 +14,7 @@ from typing import (
 )
 
 from .errors import *
-from .file import File
+from .uploaded_file import UploadedFile
 
 __all__ = (
     "WebhookStorage",
@@ -31,15 +33,26 @@ class WebhookStorage:
 
     async def upload_file(
             self,
-            fp: Union[str, bytes, os.PathLike[Any], io.BufferedIOBase],
+            file: Union[str, bytes, os.PathLike[Any], io.BufferedIOBase, discord.File],
             filename: Optional[str] = None,
-        ) -> File:
+        ) -> UploadedFile:
         """Upload a file"""
-        file = discord.File(fp, filename)
+        if isinstance(file, discord.File):
+            _file = _file
+        else:
+            if isinstance(file, str):
+                if file[:7] == "http://" or file[:8] == "https://":
+                    async with self.session.get(file) as resp:
+                        if resp.status == 200:
+                            _file = discord.File(io.BytesIO(await resp.read()), Path(urlparse(file).path).name)
+                else:
+                    _file = discord.File(file, filename)
+            else:
+                _file = discord.File(file, filename)
 
-        message = await self.webhook.send(file=file, wait=True)
+        message = await self.webhook.send(file=_file, wait=True)
 
-        return File(message)
+        return UploadedFile(message)
     
     async def close(self):
         await self.session.close()

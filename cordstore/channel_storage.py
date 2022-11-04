@@ -3,6 +3,9 @@ from discord.ext import commands
 
 import os
 import io
+import aiohttp
+from urllib.parse import urlparse
+from pathlib import Path
 
 from typing import (
     Union,
@@ -11,7 +14,7 @@ from typing import (
 )
 
 from .errors import *
-from .file import File
+from .uploaded_file import UploadedFile
 
 __all__ = (
     "ChannelStorage",
@@ -22,9 +25,11 @@ class ChannelStorage:
     def __init__(
             self, 
             bot: Union[discord.Client, discord.AutoShardedClient, commands.Bot, commands.AutoShardedBot], 
-            channel: Union[discord.TextChannel, int]
+            channel: Union[discord.TextChannel, int],
+            session: aiohttp.ClientSession = None
         ) -> None:
 
+        self.session: aiohttp.ClientSession = session or aiohttp.ClientSession()
         self.bot: discord.Client|discord.AutoShardedClient|commands.Bot|commands.AutoShardedBot = bot
 
         if isinstance(channel, int):
@@ -36,12 +41,11 @@ class ChannelStorage:
 
     async def upload_file(
             self,
-            fp: Union[str, bytes, os.PathLike[Any], io.BufferedIOBase],
+            file: Union[str, bytes, os.PathLike[Any], io.BufferedIOBase, discord.File],
             filename: Optional[str] = None,
             channel: Union[discord.TextChannel, int] = None
-        ) -> File:
+        ) -> UploadedFile:
         """Upload a file"""
-        file = discord.File(fp, filename)
 
         if channel:
             if isinstance(channel, int):
@@ -56,6 +60,22 @@ class ChannelStorage:
         else:
             _channel = self.channel
 
+        if isinstance(file, discord.File):
+            _file = _file
+        else:
+            if isinstance(file, str):
+                if file[:7] == "http://" or file[:8] == "https://":
+                    async with self.session.get(file) as resp:
+                        if resp.status == 200:
+                            _file = discord.File(io.BytesIO(await resp.read()), Path(urlparse(file).path).name)
+                else:
+                    _file = discord.File(file, filename)
+            else:
+                _file = discord.File(file, filename)
+
         message = await _channel.send(file=file)
 
-        return File(message)
+        return UploadedFile(message)
+
+    async def close(self):
+        await self.session.close()
