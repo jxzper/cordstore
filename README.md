@@ -1,4 +1,4 @@
-# cordstore
-Use discord as a file storage using webhooks or bots
+# CordStore
+Store files in textchannels using bots or webhooks
 
 ---
