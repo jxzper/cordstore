@@ -45,7 +45,13 @@ class ChannelStorage:
             filename: Optional[str] = None,
             channel: Union[discord.TextChannel, int] = None
         ) -> UploadedFile:
-        """Upload a file"""
+        """
+Upload a file - Supports:
+- Paths
+- Urls
+- Bytes
+- discord.File
+        """
 
         if channel:
             if isinstance(channel, int):

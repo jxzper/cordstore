@@ -36,7 +36,13 @@ class WebhookStorage:
             file: Union[str, bytes, os.PathLike[Any], io.BufferedIOBase, discord.File],
             filename: Optional[str] = None,
         ) -> UploadedFile:
-        """Upload a file"""
+        """
+Upload a file - Supports:
+- Paths
+- Urls
+- Bytes
+- discord.File
+        """
         if isinstance(file, discord.File):
             _file = _file
         else:
