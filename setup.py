@@ -8,7 +8,7 @@ setup(
     description='Utilize discord to store files in textchannels using bots or webhooks',
     version="0.0.2",
     install_requires=[
-        "discord",
+        "discord.py",
         "aiohttp",
     ],
     packages=['cordstore'],
